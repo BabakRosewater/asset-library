@@ -15,6 +15,7 @@ Centralized source-of-truth for brand and department assets.
 2. Export approved deliverables into `dist/`.
 3. Update `dist/manifest.json` with metadata.
 4. Follow naming rules in `docs/naming-conventions.md`.
+5. For React/UI training visuals, follow `docs/training-asset-placement.md`.
 
 ## Asset lifecycle
 

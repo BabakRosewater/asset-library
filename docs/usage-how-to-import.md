@@ -13,3 +13,8 @@ Find department-specific assets in `dist/departments/<department>/`.
 
 ## Shared assets
 Reusable cross-department assets are in `dist/shared/`.
+
+
+## Component-based visuals (React)
+- Keep editable component code in `src/departments/<department>/training/<asset-name>/`.
+- Import into training projects from exported files in `dist/departments/<department>/ui/training/<asset-name>/`, not directly from source JSX.

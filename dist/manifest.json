@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-02-19T18:10:08.109192+00:00",
+  "updatedAt": "2026-02-19T18:18:39.253487+00:00",
   "assets": [
     {
       "id": "brand-logo-primary",
@@ -32,6 +32,23 @@
       "sourcePath": "src/departments/sales/lead-intake.drawio",
       "distPath": "dist/departments/sales/workflows/sales_workflow-lead-intake_primary_v1_1920w.svg",
       "owner": "sales-ops"
+    },
+    {
+      "id": "service-ui-wiifm-alignment",
+      "title": "Service WIIFM Alignment (Training Visual)",
+      "department": "service",
+      "tags": [
+        "training",
+        "ui",
+        "wiifm",
+        "workflow"
+      ],
+      "format": "png/svg/pdf",
+      "dimensions": "1920w,3840w,vector",
+      "status": "draft",
+      "sourcePath": "src/departments/service/training/wiifm-alignment/WIIFMAlignment.jsx",
+      "distPath": "dist/departments/service/ui/training/wiifm-alignment/",
+      "owner": "service-training"
     }
   ]
 }
