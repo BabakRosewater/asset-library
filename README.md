@@ -16,6 +16,7 @@ Centralized source-of-truth for brand and department assets.
 3. Update `dist/manifest.json` with metadata.
 4. Follow naming rules in `docs/naming-conventions.md`.
 5. For React/UI training visuals, follow `docs/training-asset-placement.md`.
+6. Follow `docs/new-asset-sop.md` for the repeatable add-a-new-asset workflow.
 
 ## Asset lifecycle
 
