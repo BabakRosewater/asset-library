@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-02-19T18:10:08.109192+00:00",
+  "assets": [
+    {
+      "id": "brand-logo-primary",
+      "title": "Primary Brand Logo",
+      "department": "brand",
+      "tags": [
+        "logo",
+        "primary"
+      ],
+      "format": "svg",
+      "dimensions": "vector",
+      "status": "approved",
+      "sourcePath": "src/brand/logo_master_files/brand-logo-primary.ai",
+      "distPath": "dist/brand/logos/brand_logo-primary_primary_v1.svg",
+      "owner": "brand-team"
+    },
+    {
+      "id": "sales-workflow-lead-intake",
+      "title": "Sales Lead Intake Workflow",
+      "department": "sales",
+      "tags": [
+        "workflow",
+        "sales",
+        "lead-intake"
+      ],
+      "format": "svg",
+      "dimensions": "1920w",
+      "status": "approved",
+      "sourcePath": "src/departments/sales/lead-intake.drawio",
+      "distPath": "dist/departments/sales/workflows/sales_workflow-lead-intake_primary_v1_1920w.svg",
+      "owner": "sales-ops"
+    }
+  ]
+}
