@@ -29,3 +29,11 @@ For a Service app header component:
 - `service_ui-header-ro-process-chain_primary_v1_1920w.png`
 - `service_ui-header-ro-process-chain_primary_v1.svg`
 - `service_ui-header-ro-process-chain_primary_v1.pdf`
+
+
+## Additional example: Master Hub Frame
+
+- Source:
+  - `src/departments/service/ui/headers/master-hub-frame/MasterHubFrame.jsx`
+- Dist:
+  - `dist/departments/service/ui/headers/master-hub-frame/`

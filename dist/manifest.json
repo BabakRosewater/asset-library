@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-02-19T19:07:02.211390+00:00",
+  "updatedAt": "2026-02-19T20:50:19.040260+00:00",
   "assets": [
     {
       "id": "brand-logo-primary",
@@ -99,6 +99,24 @@
       "status": "draft",
       "sourcePath": "src/departments/service/ui/headers/ro-process-chain-header/ROProcessChainHeader.jsx",
       "distPath": "dist/departments/service/ui/headers/ro-process-chain-header/",
+      "owner": "service-training"
+    },
+    {
+      "id": "service-ui-header-master-hub-frame",
+      "title": "Service Master Hub Frame",
+      "department": "service",
+      "tags": [
+        "ui",
+        "header",
+        "hub",
+        "navigation",
+        "injectable"
+      ],
+      "format": "png/svg/pdf/html",
+      "dimensions": "1920w,3840w,vector,responsive",
+      "status": "draft",
+      "sourcePath": "src/departments/service/ui/headers/master-hub-frame/MasterHubFrame.jsx",
+      "distPath": "dist/departments/service/ui/headers/master-hub-frame/",
       "owner": "service-training"
     }
   ]

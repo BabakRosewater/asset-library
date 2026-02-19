@@ -2,6 +2,7 @@
   "version": "1.0",
   "files": [
     "dist/README.md",
+    "dist/departments/service/ui/headers/master-hub-frame/README.md",
     "dist/departments/service/ui/headers/ro-process-chain-header/README.md",
     "dist/departments/service/ui/training/ro-process-chain-analysis/README.md",
     "dist/departments/service/ui/training/service-cycle-wiifm/README.md",
@@ -9,6 +10,7 @@
     "src/departments/service/training/ro-process-chain-analysis/ROProcessChainAnalysis.jsx",
     "src/departments/service/training/service-cycle-wiifm/ServiceCycleWIIFM.jsx",
     "src/departments/service/training/wiifm-alignment/WIIFMAlignment.jsx",
+    "src/departments/service/ui/headers/master-hub-frame/MasterHubFrame.jsx",
     "src/departments/service/ui/headers/ro-process-chain-header/ROProcessChainHeader.jsx"
   ]
 }
