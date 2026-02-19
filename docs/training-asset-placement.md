@@ -34,3 +34,10 @@ Recommended exports based on use case:
 - `service_ui-wiifm-alignment_primary_v1_1920w.png`
 - `service_ui-wiifm-alignment_primary_v1.svg`
 - `service_ui-wiifm-alignment_primary_v1.pdf`
+
+## Additional example: RO Process Chain Analysis
+
+- Source component:
+  - `src/departments/service/training/ro-process-chain-analysis/ROProcessChainAnalysis.jsx`
+- Export target folder:
+  - `dist/departments/service/ui/training/ro-process-chain-analysis/`

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-02-19T18:18:39.253487+00:00",
+  "updatedAt": "2026-02-19T18:28:20.370283+00:00",
   "assets": [
     {
       "id": "brand-logo-primary",
@@ -48,6 +48,23 @@
       "status": "draft",
       "sourcePath": "src/departments/service/training/wiifm-alignment/WIIFMAlignment.jsx",
       "distPath": "dist/departments/service/ui/training/wiifm-alignment/",
+      "owner": "service-training"
+    },
+    {
+      "id": "service-ui-ro-process-chain-analysis",
+      "title": "Service RO Process Chain Analysis (Training Visual)",
+      "department": "service",
+      "tags": [
+        "training",
+        "ui",
+        "ro-process",
+        "workflow"
+      ],
+      "format": "png/svg/pdf",
+      "dimensions": "1920w,3840w,vector",
+      "status": "draft",
+      "sourcePath": "src/departments/service/training/ro-process-chain-analysis/ROProcessChainAnalysis.jsx",
+      "distPath": "dist/departments/service/ui/training/ro-process-chain-analysis/",
       "owner": "service-training"
     }
   ]
