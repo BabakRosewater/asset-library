@@ -11,7 +11,7 @@ A lightweight front-end tool for browsing and previewing assets from this reposi
 - Loads `dist/manifest.json` and lists all indexed assets.
 - Supports search by title/id/tags/path and filters by department/status.
 - Shows metadata (`sourcePath`, `distPath`, status, tags).
-- Renders visual previews when available from `dist` (images/PDF/HTML).
+- Renders visual previews from `previewPath` when available (recommended for consistent cards across repos).
 - For `.jsx` source assets, attempts a browser sandbox render for quick visual inspection.
 
 ## Run locally
@@ -35,3 +35,8 @@ python3 scripts/build-viewer-index.py
 ```
 
 This writes `dist/viewer-index.json`.
+
+
+## Manifest recommendation
+
+Add `previewPath` to each manifest asset (relative path in repo) for reliable preview cards in the explorer.
