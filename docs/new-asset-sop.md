@@ -70,3 +70,6 @@ Follow policy:
 - [ ] `python3 -m json.tool dist/manifest.json >/dev/null` run
 - [ ] Review approval completed
 - [ ] Older versions moved to `dist/_deprecated/` when replaced
+
+
+> For headers/heroes and other reusable app UI elements, follow `docs/ui-asset-categorization.md`.

@@ -18,3 +18,8 @@ Reusable cross-department assets are in `dist/shared/`.
 ## Component-based visuals (React)
 - Keep editable component code in `src/departments/<department>/training/<asset-name>/`.
 - Import into training projects from exported files in `dist/departments/<department>/ui/training/<asset-name>/`, not directly from source JSX.
+
+
+## Reusable app UI assets (headers/heroes)
+- Keep editable source in `src/departments/<department>/ui/headers/<asset-name>/`.
+- Import-ready files should come from `dist/departments/<department>/ui/headers/<asset-name>/`.

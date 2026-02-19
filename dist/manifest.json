@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-02-19T18:35:05.845816+00:00",
+  "updatedAt": "2026-02-19T19:07:02.211390+00:00",
   "assets": [
     {
       "id": "brand-logo-primary",
@@ -82,6 +82,23 @@
       "status": "draft",
       "sourcePath": "src/departments/service/training/service-cycle-wiifm/ServiceCycleWIIFM.jsx",
       "distPath": "dist/departments/service/ui/training/service-cycle-wiifm/",
+      "owner": "service-training"
+    },
+    {
+      "id": "service-ui-header-ro-process-chain",
+      "title": "Service RO Process Chain Header",
+      "department": "service",
+      "tags": [
+        "ui",
+        "header",
+        "service",
+        "ro-process-chain"
+      ],
+      "format": "png/svg/pdf",
+      "dimensions": "1920w,3840w,vector",
+      "status": "draft",
+      "sourcePath": "src/departments/service/ui/headers/ro-process-chain-header/ROProcessChainHeader.jsx",
+      "distPath": "dist/departments/service/ui/headers/ro-process-chain-header/",
       "owner": "service-training"
     }
   ]

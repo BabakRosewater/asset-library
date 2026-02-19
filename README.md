@@ -17,6 +17,7 @@ Centralized source-of-truth for brand and department assets.
 4. Follow naming rules in `docs/naming-conventions.md`.
 5. For React/UI training visuals, follow `docs/training-asset-placement.md`.
 6. Follow `docs/new-asset-sop.md` for the repeatable add-a-new-asset workflow.
+7. For reusable in-app UI elements (headers/heroes), use `docs/ui-asset-categorization.md`.
 
 ## Asset lifecycle
 
