@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Asset Library Explorer</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@0.468.0"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .gradient-bg{
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(99,102,241,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 15%, rgba(168,85,247,.15), transparent 55%),
+        linear-gradient(135deg, #0b1220 0%, #111827 55%, #0b1220 100%);
+    }
+    .card { background: rgba(17,24,39,.72); border: 1px solid rgba(148,163,184,.18); box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+    .pill { background: rgba(2,6,23,.55); border: 1px solid rgba(148,163,184,.18); }
+    .btn { border: 1px solid rgba(148,163,184,.24); background: rgba(2,6,23,.55); }
+    .btn:hover { background: rgba(2,6,23,.75); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+
+<body class="gradient-bg min-h-screen text-slate-100">
+  <div class="max-w-[1350px] mx-auto px-4 py-8 space-y-5">
+
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 pill rounded-full px-3 py-1 text-xs text-slate-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          Multi-Library Asset Explorer • Visual Browser + Copy Links
+        </div>
+        <h1 class="text-2xl md:text-3xl font-extrabold mt-3 tracking-tight">Asset Library Explorer</h1>
+        <p class="text-slate-300 mt-1 max-w-[900px]">
+          Loads <span class="mono">dist/manifest.json</span> from one or more GitHub repos and gives you a visual catalog:
+          search, filter, preview, copy CDN/RAW links, and open source folders.
+        </p>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="btnReload" class="btn rounded-xl px-4 py-2 text-sm font-semibold inline-flex items-center gap-2">
+          <i data-lucide="refresh-ccw" class="w-4 h-4"></i> Reload
+        </button>
+        <button id="btnCopyState" class="btn rounded-xl px-4 py-2 text-sm font-semibold inline-flex items-center gap-2">
+          <i data-lucide="copy" class="w-4 h-4"></i> Copy Filters Link
+        </button>
+      </div>
+    </div>
+
+    <div class="card rounded-2xl p-4 md:p-5 space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
+        <div class="lg:col-span-5">
+          <label class="text-xs text-slate-300">Search (title / id / tags)</label>
+          <input id="q" class="mt-1 w-full rounded-xl px-3 py-2 bg-slate-950/50 border border-slate-500/25 text-slate-100"
+                 placeholder="Type to search…" />
+        </div>
+
+        <div class="lg:col-span-3">
+          <label class="text-xs text-slate-300">Library</label>
+          <select id="lib" class="mt-1 w-full rounded-xl px-3 py-2 bg-slate-950/50 border border-slate-500/25 text-slate-100"></select>
+        </div>
+
+        <div class="lg:col-span-2">
+          <label class="text-xs text-slate-300">Department</label>
+          <select id="dept" class="mt-1 w-full rounded-xl px-3 py-2 bg-slate-950/50 border border-slate-500/25 text-slate-100"></select>
+        </div>
+
+        <div class="lg:col-span-2">
+          <label class="text-xs text-slate-300">Status</label>
+          <select id="status" class="mt-1 w-full rounded-xl px-3 py-2 bg-slate-950/50 border border-slate-500/25 text-slate-100">
+            <option value="ALL" selected>All</option>
+            <option value="approved">approved</option>
+            <option value="draft">draft</option>
+            <option value="deprecated">deprecated</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 items-center text-xs text-slate-300">
+        <span class="text-slate-400">Tip:</span>
+        Add <span class="mono">previewPath</span> per manifest item for reliable visual cards.
+        <span id="loadNote" class="ml-auto text-slate-400"></span>
+      </div>
+    </div>
+
+    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+    <div id="empty" class="hidden card rounded-2xl p-10 text-center text-slate-300">
+      No assets match your filters.
+    </div>
+
+  </div>
+
+  <script>
+    const LIBRARIES = [
+      {
+        id: 'asset-library',
+        name: 'Asset Library',
+        owner: 'BabakRosewater',
+        repo: 'asset-library',
+        ref: 'main',
+        manifestPath: 'dist/manifest.json',
+      },
+    ];
+
+    const state = {
+      libs: [],
+      assets: [],
+      filters: { q: '', lib: 'ALL', dept: 'ALL', status: 'ALL' },
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function rawBase(L){ return `https://raw.githubusercontent.com/${L.owner}/${L.repo}/${L.ref}/`; }
+    function cdnBase(L){ return `https://cdn.jsdelivr.net/gh/${L.owner}/${L.repo}@${L.ref}/`; }
+    function ghBlobBase(L){ return `https://github.com/${L.owner}/${L.repo}/blob/${L.ref}/`; }
+    function ghTreeBase(L){ return `https://github.com/${L.owner}/${L.repo}/tree/${L.ref}/`; }
+    function joinUrl(base, rel){ return rel ? base + rel.replace(/^\//, '') : ''; }
+
+    async function fetchJSON(url){
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`);
+      return r.json();
+    }
+
+    function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))); }
+
+    function normalizeAsset(a, L){
+      const x = { ...a };
+      x.__libId = L.id;
+      x.__libName = L.name;
+      x.__rawBase = rawBase(L);
+      x.__cdnBase = cdnBase(L);
+      x.__ghBlobBase = ghBlobBase(L);
+      x.__ghTreeBase = ghTreeBase(L);
+
+      x.id = x.id || '';
+      x.title = x.title || x.name || x.id || 'Untitled';
+      x.department = (x.department || 'shared').toLowerCase();
+      x.status = (x.status || 'draft').toLowerCase();
+      x.tags = Array.isArray(x.tags) ? x.tags : [];
+      x.previewPath = x.previewPath || x.preview || '';
+
+      return x;
+    }
+
+    async function loadAll(){
+      $('loadNote').textContent = 'Loading manifests…';
+      state.assets = [];
+
+      const loaded = [];
+      for (const L of LIBRARIES){
+        const manifestUrl = joinUrl(rawBase(L), L.manifestPath);
+        try {
+          const m = await fetchJSON(manifestUrl);
+          const list = Array.isArray(m) ? m : (m.assets || []);
+          const norm = list.map((a) => normalizeAsset(a, L));
+          loaded.push({ ...L, __manifestUrl: manifestUrl, __count: norm.length });
+          state.assets.push(...norm);
+        } catch (e) {
+          loaded.push({ ...L, __manifestUrl: manifestUrl, __count: 0, __error: String(e?.message || e) });
+        }
+      }
+      state.libs = loaded;
+
+      buildSelectors();
+      applyFilters();
+      $('loadNote').textContent = `Loaded ${state.assets.length} asset(s) from ${state.libs.length} library(ies).`;
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+    }
+
+    function buildSelectors(){
+      const libSel = $('lib');
+      libSel.innerHTML =
+        `<option value="ALL">All Libraries</option>` +
+        state.libs.map((L) => {
+          const suffix = L.__error ? ' (error)' : ` (${L.__count})`;
+          return `<option value="${L.id}">${L.name}${suffix}</option>`;
+        }).join('');
+
+      const depts = uniq(state.assets.map((a) => a.department)).sort((a, b) => a.localeCompare(b));
+      const deptSel = $('dept');
+      deptSel.innerHTML = `<option value="ALL">All</option>` + depts.map((d) => `<option value="${d}">${d}</option>`).join('');
+    }
+
+    function matchesQuery(a, q){
+      if (!q) return true;
+      const s = q.toLowerCase();
+      const hay = [a.title, a.id, a.department, a.status, ...(a.tags || [])].join(' ').toLowerCase();
+      return hay.includes(s);
+    }
+
+    function applyFilters(){
+      const f = state.filters;
+      const out = state.assets.filter((a) => {
+        if (f.lib !== 'ALL' && a.__libId !== f.lib) return false;
+        if (f.dept !== 'ALL' && a.department !== f.dept) return false;
+        if (f.status !== 'ALL' && a.status !== f.status) return false;
+        return matchesQuery(a, f.q);
+      });
+      renderGrid(out);
+      syncUrlState();
+    }
+
+    function badge(text){
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded-lg border border-slate-500/25 bg-slate-950/30 text-slate-200 text-xs font-semibold">${text}</span>`;
+    }
+
+    function fileTypeFromPath(p){
+      const m = (p || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+      return m ? m[1] : '';
+    }
+
+    function previewHTML(a){
+      if (!a.previewPath){
+        return `<div class="h-40 rounded-xl border border-slate-500/20 bg-slate-950/30 flex items-center justify-center text-slate-400 text-sm">No previewPath</div>`;
+      }
+
+      const ext = fileTypeFromPath(a.previewPath);
+      const src = joinUrl(a.__cdnBase, a.previewPath);
+
+      if (ext === 'pdf') {
+        return `<div class="h-40 rounded-xl overflow-hidden border border-slate-500/20 bg-slate-950/30"><iframe src="${src}" class="w-full h-full" title="preview"></iframe></div>`;
+      }
+
+      return `<div class="h-40 rounded-xl overflow-hidden border border-slate-500/20 bg-slate-950/30"><img src="${src}" alt="preview" class="w-full h-full object-cover" onerror="this.closest('div').innerHTML='<div class=\"h-40 rounded-xl border border-slate-500/20 bg-slate-950/30 flex items-center justify-center text-slate-400 text-sm\">Preview not found</div>';" /></div>`;
+    }
+
+    function cardHTML(a, idx){
+      const tags = (a.tags || []).slice(0, 5).map((t) => badge(t)).join(' ');
+      const sourcePath = a.sourcePath || '';
+      const distFolder = a.distPath || '';
+
+      const links = {
+        cdn: a.previewPath ? joinUrl(a.__cdnBase, a.previewPath) : '',
+        raw: a.previewPath ? joinUrl(a.__rawBase, a.previewPath) : '',
+        source: sourcePath ? a.__ghBlobBase + sourcePath.replace(/^\//, '') : '',
+        dist: distFolder ? a.__ghTreeBase + distFolder.replace(/^\//, '') : '',
+      };
+
+      return `
+        <div class="card rounded-2xl p-4 space-y-3" data-asset-index="${idx}">
+          ${previewHTML(a)}
+
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-sm font-extrabold leading-tight">${a.title}</div>
+              <div class="text-xs text-slate-400 mt-1"><span class="font-semibold text-slate-300">${a.department}</span> • <span class="text-slate-300">${a.status}</span> • <span class="text-slate-400">${a.__libName}</span></div>
+              <div class="text-[11px] text-slate-400 mt-1 mono break-all">${a.id}</div>
+            </div>
+            <div class="pill rounded-xl px-2 py-1 text-xs text-slate-300">${a.type || 'asset'}</div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">${tags || '<span class="text-xs text-slate-500">No tags</span>'}</div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2">
+            <button class="btn rounded-xl px-3 py-2 text-xs font-semibold inline-flex items-center justify-center gap-2" data-action="copy-cdn" ${links.cdn ? '' : 'disabled'}>
+              <i data-lucide="link" class="w-4 h-4"></i> Copy CDN
+            </button>
+
+            <button class="btn rounded-xl px-3 py-2 text-xs font-semibold inline-flex items-center justify-center gap-2" data-action="copy-raw" ${links.raw ? '' : 'disabled'}>
+              <i data-lucide="download" class="w-4 h-4"></i> Copy RAW
+            </button>
+
+            <a class="btn rounded-xl px-3 py-2 text-xs font-semibold inline-flex items-center justify-center gap-2 text-center ${links.source ? '' : 'pointer-events-none opacity-50'}" href="${links.source || '#'}" target="_blank" rel="noreferrer">
+              <i data-lucide="file-code" class="w-4 h-4"></i> Source
+            </a>
+
+            <a class="btn rounded-xl px-3 py-2 text-xs font-semibold inline-flex items-center justify-center gap-2 text-center ${links.dist ? '' : 'pointer-events-none opacity-50'}" href="${links.dist || '#'}" target="_blank" rel="noreferrer">
+              <i data-lucide="folder-open" class="w-4 h-4"></i> Dist Folder
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    async function copyText(text){
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+    }
+
+    function renderGrid(list){
+      const grid = $('grid');
+      const empty = $('empty');
+
+      if (!list.length){
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      grid.innerHTML = list.map((a, i) => cardHTML(a, i)).join('');
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+
+      grid.querySelectorAll('[data-asset-index]').forEach((card) => {
+        const a = list[Number(card.dataset.assetIndex)];
+        card.querySelector('[data-action="copy-cdn"]')?.addEventListener('click', () => copyText(a.previewPath ? joinUrl(a.__cdnBase, a.previewPath) : ''));
+        card.querySelector('[data-action="copy-raw"]')?.addEventListener('click', () => copyText(a.previewPath ? joinUrl(a.__rawBase, a.previewPath) : ''));
+      });
+    }
+
+    function syncUrlState(){
+      const u = new URL(location.href);
+      u.searchParams.set('q', state.filters.q || '');
+      u.searchParams.set('lib', state.filters.lib || 'ALL');
+      u.searchParams.set('dept', state.filters.dept || 'ALL');
+      u.searchParams.set('status', state.filters.status || 'ALL');
+      history.replaceState(null, '', u.toString());
+    }
+
+    function loadUrlState(){
+      const u = new URL(location.href);
+      state.filters.q = u.searchParams.get('q') || '';
+      state.filters.lib = u.searchParams.get('lib') || 'ALL';
+      state.filters.dept = u.searchParams.get('dept') || 'ALL';
+      state.filters.status = u.searchParams.get('status') || 'ALL';
+    }
+
+    function bind(){
+      $('q').addEventListener('input', (e) => { state.filters.q = e.target.value; applyFilters(); });
+      $('lib').addEventListener('change', (e) => { state.filters.lib = e.target.value; applyFilters(); });
+      $('dept').addEventListener('change', (e) => { state.filters.dept = e.target.value; applyFilters(); });
+      $('status').addEventListener('change', (e) => { state.filters.status = e.target.value; applyFilters(); });
+      $('btnReload').addEventListener('click', loadAll);
+      $('btnCopyState').addEventListener('click', () => copyText(location.href));
+    }
+
+    bind();
+    loadUrlState();
+    $('q').value = state.filters.q;
+
+    loadAll().then(() => {
+      $('lib').value = state.filters.lib;
+      $('dept').value = state.filters.dept;
+      $('status').value = state.filters.status;
+      applyFilters();
+    });
+  </script>
+</body>
+</html>
