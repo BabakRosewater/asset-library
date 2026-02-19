@@ -41,3 +41,11 @@ Recommended exports based on use case:
   - `src/departments/service/training/ro-process-chain-analysis/ROProcessChainAnalysis.jsx`
 - Export target folder:
   - `dist/departments/service/ui/training/ro-process-chain-analysis/`
+
+
+## Additional example: Service Cycle + WIIFM
+
+- Source component:
+  - `src/departments/service/training/service-cycle-wiifm/ServiceCycleWIIFM.jsx`
+- Export target folder:
+  - `dist/departments/service/ui/training/service-cycle-wiifm/`
