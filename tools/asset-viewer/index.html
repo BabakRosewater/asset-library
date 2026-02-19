@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Asset Library Viewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div class="max-w-7xl mx-auto p-6 space-y-4">
+    <h1 class="text-3xl font-bold">Asset Library Viewer</h1>
+    <p class="text-slate-400">Browse manifest assets and preview visuals (export files and JSX component render).</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <input id="search" class="w-full rounded-lg px-3 py-2 bg-slate-800 border border-slate-700" placeholder="Search assets..." />
+        <div class="grid grid-cols-2 gap-2">
+          <select id="department" class="rounded-lg px-2 py-2 bg-slate-800 border border-slate-700"><option value="ALL">All departments</option></select>
+          <select id="status" class="rounded-lg px-2 py-2 bg-slate-800 border border-slate-700"><option value="ALL">All status</option></select>
+        </div>
+        <div id="list" class="space-y-2 max-h-[70vh] overflow-auto"></div>
+      </div>
+
+      <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+        <div id="meta" class="text-slate-300">Select an asset to preview.</div>
+        <div id="preview" class="bg-slate-950 border border-slate-800 rounded-xl min-h-[500px] p-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = { manifest: null, index: null, filtered: [], selected: null };
+
+    async function loadJson(path) {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(`Failed to load ${path}`);
+      return res.json();
+    }
+
+    function byId(id){ return document.getElementById(id); }
+
+    function initFilters() {
+      const departments = [...new Set(state.manifest.assets.map(a => a.department).filter(Boolean))].sort();
+      const statuses = [...new Set(state.manifest.assets.map(a => a.status).filter(Boolean))].sort();
+      departments.forEach(d => byId('department').insertAdjacentHTML('beforeend', `<option>${d}</option>`));
+      statuses.forEach(s => byId('status').insertAdjacentHTML('beforeend', `<option>${s}</option>`));
+    }
+
+    function applyFilters() {
+      const q = byId('search').value.toLowerCase().trim();
+      const dept = byId('department').value;
+      const status = byId('status').value;
+      state.filtered = state.manifest.assets.filter(a => {
+        if (dept !== 'ALL' && a.department !== dept) return false;
+        if (status !== 'ALL' && a.status !== status) return false;
+        if (!q) return true;
+        return [a.id, a.title, a.department, ...(a.tags || []), a.sourcePath, a.distPath].join(' ').toLowerCase().includes(q);
+      });
+      renderList();
+    }
+
+    function renderList() {
+      const list = byId('list');
+      list.innerHTML = state.filtered.map(a => `
+        <button data-id="${a.id}" class="w-full text-left rounded-lg p-3 border ${state.selected?.id===a.id ? 'border-indigo-400 bg-indigo-500/10':'border-slate-700 bg-slate-800/40'} hover:border-slate-500">
+          <div class="font-semibold">${a.title}</div>
+          <div class="text-xs text-slate-400">${a.id}</div>
+        </button>
+      `).join('');
+      list.querySelectorAll('button[data-id]').forEach(btn => btn.onclick = () => {
+        const asset = state.manifest.assets.find(a => a.id === btn.dataset.id);
+        state.selected = asset;
+        renderList();
+        renderDetail(asset);
+      });
+    }
+
+    function renderMeta(a) {
+      byId('meta').innerHTML = `
+        <div class="space-y-1">
+          <div class="text-xl font-bold">${a.title}</div>
+          <div class="text-sm text-slate-400">${a.id}</div>
+          <div class="text-sm"><span class="text-slate-400">Department:</span> ${a.department} &nbsp; <span class="text-slate-400">Status:</span> ${a.status}</div>
+          <div class="text-sm"><span class="text-slate-400">Tags:</span> ${(a.tags||[]).join(', ') || '—'}</div>
+          <div class="text-sm break-all"><span class="text-slate-400">sourcePath:</span> <a class="text-indigo-300 underline" href="../../${a.sourcePath}" target="_blank">${a.sourcePath}</a></div>
+          <div class="text-sm break-all"><span class="text-slate-400">distPath:</span> <a class="text-indigo-300 underline" href="../../${a.distPath}" target="_blank">${a.distPath}</a></div>
+        </div>
+      `;
+    }
+
+    function findPreviewFile(a) {
+      if (!state.index?.files) return null;
+      const exts = ['.png','.jpg','.jpeg','.webp','.gif','.svg','.pdf','.html'];
+      if (a.distPath && !a.distPath.endsWith('/')) {
+        if (state.index.files.includes(a.distPath)) return a.distPath;
+      }
+      if (a.distPath?.endsWith('/')) {
+        const candidates = state.index.files.filter(f => f.startsWith(a.distPath));
+        return candidates.find(f => exts.some(e => f.toLowerCase().endsWith(e))) || candidates.find(f => f.endsWith('README.md')) || null;
+      }
+      return null;
+    }
+
+    function buildSandboxDoc(source, componentName, iconNames) {
+      const icons = iconNames.map(n => `const ${n}=({size=24})=>React.createElement('div',{style:{width:size+'px',height:size+'px',display:'inline-flex',alignItems:'center',justifyContent:'center',border:'1px solid rgba(148,163,184,.5)',borderRadius:'6px',fontSize:'10px'}},'${n.slice(0,2)}');`).join('\n');
+      return `<!doctype html><html><head><meta charset='utf-8'/><script src='https://cdn.tailwindcss.com'></script><script src='https://unpkg.com/react@18/umd/react.development.js'></script><script src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'></script><script src='https://unpkg.com/@babel/standalone/babel.min.js'></script></head><body class='bg-slate-950 text-slate-100'><div id='root'></div><script type='text/babel'>const {useState,useEffect,useMemo}=React;${icons}\n${source}\nReactDOM.createRoot(document.getElementById('root')).render(React.createElement(${componentName}));</script></body></html>`;
+    }
+
+    async function renderDetail(a) {
+      renderMeta(a);
+      const preview = byId('preview');
+      preview.innerHTML = '<div class="text-slate-400 p-4">Loading preview...</div>';
+
+      const file = findPreviewFile(a);
+      if (file) {
+        const lower = file.toLowerCase();
+        if (lower.endsWith('.png')||lower.endsWith('.jpg')||lower.endsWith('.jpeg')||lower.endsWith('.webp')||lower.endsWith('.gif')||lower.endsWith('.svg')) {
+          preview.innerHTML = `<img class="max-h-[70vh] mx-auto" src="../../${file}" alt="preview" />`;
+          return;
+        }
+        if (lower.endsWith('.pdf') || lower.endsWith('.html')) {
+          preview.innerHTML = `<iframe class="w-full h-[70vh] rounded-lg" src="../../${file}"></iframe>`;
+          return;
+        }
+      }
+
+      if (a.sourcePath?.endsWith('.jsx')) {
+        try {
+          const text = await fetch(`../../${a.sourcePath}`).then(r => r.text());
+          const iconMatch = text.match(/import\s*\{([\s\S]*?)\}\s*from\s*'lucide-react';/);
+          const iconNames = iconMatch ? iconMatch[1].split(',').map(s => s.trim()).filter(Boolean) : [];
+          let transformed = text
+            .replace(/import[\s\S]*?from\s*'react';\n?/g, '')
+            .replace(/import\s*\{[\s\S]*?\}\s*from\s*'lucide-react';\n?/g, '')
+            .replace(/export\s+default\s+function\s+(\w+)/, 'function $1');
+          const name = (transformed.match(/function\s+(\w+)\s*\(/) || [,'App'])[1];
+          const srcdoc = buildSandboxDoc(transformed, name, iconNames);
+          preview.innerHTML = `<iframe class="w-full h-[72vh] rounded-lg" sandbox="allow-scripts" srcdoc="${srcdoc.replace(/"/g,'&quot;')}"></iframe>`;
+          return;
+        } catch (e) {
+          preview.innerHTML = `<div class='text-red-300 p-4'>Could not render JSX preview: ${e.message}</div>`;
+          return;
+        }
+      }
+
+      preview.innerHTML = `<div class="text-slate-400 p-4">No visual preview found for this asset yet. Add export files under distPath.</div>`;
+    }
+
+    async function boot() {
+      try {
+        const [manifest, index] = await Promise.all([
+          loadJson('../../dist/manifest.json'),
+          loadJson('../../dist/viewer-index.json').catch(() => ({ files: [] })),
+        ]);
+        state.manifest = manifest;
+        state.index = index;
+        initFilters();
+        byId('search').oninput = applyFilters;
+        byId('department').onchange = applyFilters;
+        byId('status').onchange = applyFilters;
+        applyFilters();
+      } catch (e) {
+        byId('meta').textContent = `Failed loading viewer data: ${e.message}`;
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>
