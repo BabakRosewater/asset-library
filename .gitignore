@@ -1,0 +1,14 @@
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Build/cache
+*.log
+.tmp/
+
+# Optional local exports
+exports/
